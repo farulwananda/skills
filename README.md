@@ -1,4 +1,4 @@
-# Farul Wananda Skills (`fw-*`)
+# Personal Engineering Skills (`fw-*`)
 
 Personal agent & developer skills for engineering modern web applications, distributed APIs, CLI tools, and production infrastructure.
 
