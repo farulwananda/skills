@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Writing React"
+  short_description: "Write accessible, repository-native React"
+  default_prompt: "Use $fw-writing-react to inspect installed React and host-framework versions, then implement this change with existing accessible components, state contracts, and styling conventions; avoid unnecessary dependencies."
