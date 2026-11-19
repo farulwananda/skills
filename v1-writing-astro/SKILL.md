@@ -1,18 +1,18 @@
 ---
-name: fw-writing-astro
+name: v1-writing-astro
 description: Use when building, reviewing, or refactoring Astro components, content-driven sites, static pages, or on-demand routes. Covers rendering boundaries, minimal browser scripts, typed props, version-aware Content Collections, locale routing, metadata, and assets.
 license: MIT
 metadata:
   author: Farul Wananda Astro conventions; modern web standards
 ---
 
-# FW Writing Astro
+# V1 Writing Astro
 
 ## Scope and first decisions
 
 Use this skill for Astro-specific components, routing, content, rendering, and integrations. Do not use it to prescribe React internals, a backend architecture, or a deployment provider; pair the relevant framework/runtime skill only when needed.
 
-Before editing, inspect package.json, the lockfile, Astro and adapter versions, astro.config.*, tsconfig, existing routes/layouts/content configuration, and repository scripts. Follow installed-version documentation and existing conventions. Do not install integrations, upgrade dependencies, deploy, or call paid services without authorization.
+Before editing, inspect package.json, the lockfile, Astro and adapter versions, astro.config.*, tsconfig, existing routes/layouts/content configuration, and repository scripts. Follow installed-version documentation and existing conventions; majors differ materially (Astro 6 requires Node 22.12+ and Vite 7, removes legacy collections and `Astro.glob()`; Astro 7 moves to Vite 8, a stricter Rust compiler, and a new default Markdown processor). Do not install integrations, upgrade dependencies, deploy, or call paid services without authorization.
 
 - Prefer prerendered HTML for content that can be built ahead of time. Frontmatter runs at build time for prerendered routes, and on the server for on-demand routes; it is not browser code.
 - Use SSR for actual request-time requirements such as authenticated content or fresh data. It requires a compatible adapter. In versions supporting the current model, default static output can opt individual routes into SSR with `export const prerender = false`; `output: 'server'` makes SSR the default and permits `prerender = true` exceptions. Older versions have different hybrid configuration: inspect before migrating.
@@ -49,7 +49,7 @@ Use named slots for explicit content regions and `class:list` for conditional cl
 
 ## Small browser behavior before framework islands
 
-Use semantic HTML first (`details`, native forms), then a small processed `<script>` when browser behavior is needed. Do not add React/Vue/Svelte just to toggle a menu. Astro scripts are bundled/deduplicated; select all component instances or use a scoped custom element. With client-side navigation, follow the installed router's lifecycle and avoid duplicate listeners. Frontmatter values are not automatically available in browser scripts; pass only non-secret data through explicit DOM attributes or props.
+Use semantic HTML first (`details`, native forms), then a small processed `<script>` when browser behavior is needed. Do not add React/Vue/Svelte just to toggle a menu. Astro scripts are bundled/deduplicated; select all component instances or use a scoped custom element. With client-side navigation (`<ClientRouter />`; `<ViewTransitions />` was removed in Astro 6), follow the installed router's lifecycle and avoid duplicate listeners. Frontmatter values are not automatically available in browser scripts; pass only non-secret data through explicit DOM attributes or props. Where supported, declare environment variables in the `env.schema` config and read secrets only from `astro:env/server`; in Astro 6+ `import.meta.env` values are inlined and not type-coerced.
 
 **ASTRO-BUTTON** — complete `src/components/Counter.astro`, for ordinary full-page navigation:
 
@@ -71,15 +71,17 @@ Use a framework island when existing framework components or substantial interac
 
 Use collections for repeated structured content, not every isolated page. Inspect existing configuration and entry identifiers before editing:
 
-- Astro 5 introduced the Content Layer loader model, normally in `src/content.config.ts`. Legacy projects may use `src/content/config.ts` and `type: 'content'` rather than loaders. These are not interchangeable file locations/APIs.
-- Check the installed Zod export. The following example targets Astro 5's `z` export from `astro:content`; current documentation uses `astro/zod`. Do not mechanically replace imports in a version that lacks that module.
-- Loader entries use `id`; do not assume legacy `slug` or `entry.render()` APIs. For Content Layer rendering, use the supported `render(entry)` helper. MDX requires its integration if MDX files are included.
+- Astro 5 introduced the Content Layer loader model in `src/content.config.ts`. Astro 6 removed legacy collections: `src/content/config.ts`, `type: 'content'`/`'data'`, and `legacy.collections` no longer work. Astro 4/5-legacy projects still use them; migrate only as a deliberate upgrade.
+- Check the installed Zod major. Current docs import `z` from `astro/zod` (Zod 4 from Astro 6: e.g. `z.email()`, `error:` instead of `message:`); `z` from `astro:content` is deprecated. Astro 5 uses Zod 3; do not mechanically rewrite schema methods across majors.
+- Loader entries use `id`; do not assume legacy `slug`, `getEntryBySlug()`, or `entry.render()` APIs. Use `getEntry()` and the `render(entry)` helper. MDX requires its integration if MDX files are included.
+- Request-time data that must not be baked into the build can use live collections (stable in Astro 6) in `src/live.config.ts` with `defineLiveCollection()` and `getLiveCollection()`/`getLiveEntry()`; they require on-demand rendering. Do not convert build-time content to live collections without a freshness requirement.
 
-**ASTRO-COLLECTION-V5** — complete `src/content.config.ts` for Astro 5 with local Markdown entries:
+**ASTRO-COLLECTION** — complete `src/content.config.ts` for Astro 6+ with local Markdown entries (Astro 5: same shape, Zod 3):
 
 ```typescript
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
@@ -131,9 +133,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
 ## Assets and deployment boundaries
 
-Prefer `src/assets/` and `Image` from `astro:assets` for images that benefit from processing. Keep assets requiring unchanged URLs, robots.txt, and icons in `public/`; ordinary `<img>` is valid for deliberate passthrough/remote cases. Supply meaningful `alt` (empty for decorative images) and intrinsic dimensions or equivalent layout constraints. Match responsive-image APIs to the installed version and avoid eagerly loading every image; prioritize only genuinely above-the-fold critical images. Check SSR image services and their runtime/cost requirements before enabling them.
+Prefer `src/assets/` and `Image` from `astro:assets` for images that benefit from processing. Keep assets requiring unchanged URLs, robots.txt, and icons in `public/`; ordinary `<img>` is valid for deliberate passthrough/remote cases. Supply meaningful `alt` (empty for decorative images) and intrinsic dimensions or equivalent layout constraints. Match responsive-image APIs to the installed version and avoid eagerly loading every image; prioritize only genuinely above-the-fold critical images. Check SSR image services and their runtime/cost requirements before enabling them; Astro 6 crops by default and never upscales. For web fonts, the Fonts API (stable in Astro 6) is an option; keep an existing working font setup unless asked. Preserve any configured `security.csp` policy.
 
-Use the existing host's headers/redirect mechanisms only when needed. `_headers` and `_redirects` are provider-specific, not universal Astro requirements. For adapter SSR, follow that adapter version's generated output and runtime binding conventions rather than a hand-written generic static/SPA configuration.
+Use the existing host's headers/redirect mechanisms only when needed. `_headers` and `_redirects` are provider-specific, not universal Astro requirements. For adapter SSR, follow that adapter version's generated output and runtime binding conventions rather than a hand-written generic static/SPA configuration. For example, `@astrojs/cloudflare` 13+ targets Workers only (no Pages), runs `astro dev` in `workerd`, and replaces `Astro.locals.runtime` with `import { env } from 'cloudflare:workers'`.
 
 ## Verification and reporting
 
@@ -144,5 +146,5 @@ Use the repository's existing check/build/test scripts when authorized. Check pr
 This is the author's synthesis, not a bulk copy of third-party skills. Read only the documentation relevant to the task and installed version:
 
 - Official Astro: [components and props](https://docs.astro.build/en/basics/astro-components/), [browser scripts](https://docs.astro.build/en/guides/client-side-scripts/), [on-demand rendering](https://docs.astro.build/en/guides/on-demand-rendering/).
-- Official Astro: [Content Collections](https://docs.astro.build/en/guides/content-collections/), [Astro 5 migration](https://docs.astro.build/en/guides/upgrade-to/v5/), [i18n routing](https://docs.astro.build/en/guides/internationalization/), [Cloudflare adapter](https://docs.astro.build/en/guides/integrations-guide/cloudflare/).
+- Official Astro: [Content Collections](https://docs.astro.build/en/guides/content-collections/), [Astro 5](https://docs.astro.build/en/guides/upgrade-to/v5/), [Astro 6](https://docs.astro.build/en/guides/upgrade-to/v6/), and [Astro 7](https://docs.astro.build/en/guides/upgrade-to/v7/) upgrade guides, [i18n routing](https://docs.astro.build/en/guides/internationalization/), [Cloudflare adapter](https://docs.astro.build/en/guides/integrations-guide/cloudflare/).
 - [astrolicious/agent-skills](https://github.com/astrolicious/agent-skills) is a community reference, not official Astro documentation or a compatibility guarantee. Consult it selectively; official version-matched API documentation takes precedence.
