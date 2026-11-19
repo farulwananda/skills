@@ -1,20 +1,20 @@
 ---
-name: fw-writing-fastapi
+name: v1-writing-fastapi
 description: Use when building, reviewing, or refactoring FastAPI APIs. Inspect installed versions and existing conventions; apply typed HTTP contracts, correct async boundaries, explicit resource and transaction ownership, isolated tests, and public response schemas without mandatory layers.
 license: MIT
 metadata:
   author: Farul Wananda backend conventions; modern FastAPI engineering
 ---
 
-# FW Writing FastAPI
+# V1 Writing FastAPI
 
 ## Scope and repository context
 
-Use this skill for FastAPI routing, schemas, dependencies, lifecycle, and API tests. Use `fw-writing-python` for language/concurrency details. Do not use this skill alone to choose deployment infrastructure, redesign a non-FastAPI application, or introduce an ORM.
+Use this skill for FastAPI routing, schemas, dependencies, lifecycle, and API tests. Use `v1-writing-python` for language/concurrency details. Do not use this skill alone to choose deployment infrastructure, redesign a non-FastAPI application, or introduce an ORM.
 
 Before editing, inspect the application entrypoint, routers, dependencies, tests, `pyproject.toml`, lockfile, and CI. Establish the supported Python version and the **installed** FastAPI, Starlette, Pydantic, HTTPX, ORM, and async-test plugin versions in the project environment. Do not assume current online documentation matches an older lockfile.
 
-- Prefer existing conventions and dependencies. `Annotated` is available in Python 3.9+; use the repository's compatibility approach where necessary. Pydantic v2 examples do not justify silently migrating a v1 application.
+- Prefer existing conventions and dependencies. `Annotated` is available in Python 3.9+; use the repository's compatibility approach where necessary. Pydantic v2 examples do not justify silently migrating a v1 application. Upgrading FastAPI is itself a migration: 0.126+ requires Pydantic v2 (>=2.7), 0.128 removed `pydantic.v1` model support, 0.129/0.162.6 dropped Python 3.9/3.10 (current releases need 3.11+), and FastAPI 0.133+ supports Starlette 1.x. Read the release notes between the locked and target versions.
 - Do not require service/repository layers, async database drivers, settings packages, caches, retries, or new tooling. A small endpoint may call a query or domain function directly. Extract reusable policy or workflows when complexity warrants it.
 - Use `APIRouter` for real domain/version boundaries, not a mandatory folder hierarchy. Preserve existing authentication, authorization, tenant isolation, rate limits, and idempotency guards.
 
@@ -32,8 +32,9 @@ Do not share a mutable database session across concurrent tasks. Verify thread s
 
 ## HTTP and data contracts
 
-- Type path/query/header values directly; use Pydantic body models for structured validation. Not every scalar parameter needs its own model.
-- Keep input, internal, persistence, and **public output** shapes separate when they differ. A return model or `response_model` validates, documents, serializes, and filters output; never leak credentials, tokens, internal job payloads, or ORM-only fields.
+- Type path/query/header values directly; use Pydantic body models for structured validation. Not every scalar parameter needs its own model. FastAPI 0.115+ also accepts Pydantic models for grouped query/header/cookie parameters; their `extra` handling and default validation changed in later releases (0.148, 0.160), so check the installed version.
+- Recent FastAPI rejects JSON bodies without a JSON `Content-Type` by default (0.132, `strict_content_type`) and distinguishes explicit JSON `null` from omitted `Body` values (0.151). Preserve the contract existing clients rely on when upgrading.
+- Keep input, internal, persistence, and **public output** shapes separate when they differ. A return type annotation (preferred when the returned value is the public model) or `response_model` (when returning a different object) validates, documents, serializes, and filters output; `ORJSONResponse`/`UJSONResponse` are deprecated since 0.131; never leak credentials, tokens, internal job payloads, or ORM-only fields.
 - For Pydantic v2, use `model_validate`, `model_dump`, and `ConfigDict(from_attributes=True)` only when needed. For older installations, follow their supported API. Distinguish omitted PATCH fields from explicit `null` with the installed model's unset-field support.
 - Use `Decimal` or existing integer-minor-unit contracts for exact money values; do not introduce float rounding into paid workflows.
 - Missing optional scraped fields may be `None`; malformed/failed upstream data is not a successful fabricated article. Define whether partial results are permitted and expose their status honestly.
@@ -128,11 +129,11 @@ Preserve existing trend24-endpoint timeout, lifecycle, fan-out, and duplicate-su
 
 ## Dependencies and transaction ownership
 
-Prefer `Annotated[T, Depends(provider)]` where supported and reuse aliases for repeated dependencies. Keep providers overrideable. Dependencies that acquire request resources should yield with guaranteed close/rollback cleanup; never suppress a caught exception after `yield`.
+Prefer `Annotated[T, Depends(provider)]` where supported and reuse aliases for repeated dependencies. On FastAPI 0.163+, `Depends(provider, max_concurrency=n)` on a reused alias can cap concurrent use of a pooled resource per worker process; a new `Depends()` creates a separate limit. Keep providers overrideable. Dependencies that acquire request resources should yield with guaranteed close/rollback cleanup; never suppress a caught exception after `yield`.
 
 Choose **one** transaction owner per unit of work and keep it explicit:
 - The session dependency can own session lifetime while a route/domain operation owns `begin`/commit/rollback. Or use the repository's existing transaction-owning dependency if its semantics are intentional. Do not commit in both.
-- Complete commit and any required flush/refresh before returning success. Do not rely on a commit after dependency `yield` if cleanup may occur after the response was sent; yield timing/scopes vary by FastAPI version and streaming behavior.
+- Complete commit and any required flush/refresh before returning success. Do not rely on a commit after dependency `yield` if cleanup may occur after the response was sent. Timing varies by version: 0.106–0.117 ran exit code before the response; 0.118+ runs it after the response is sent (default `scope="request"`), and 0.121+ offers `Depends(..., scope="function")` to exit before the response. Streaming responses need request scope.
 - Helpers may flush when needed but must not silently commit an outer transaction. Roll back on failure, close sessions, and map known constraint conflicts at the appropriate boundary.
 - An external paid submission and a local SQL commit are not atomic together. Preserve the real workflow's idempotency/reconciliation guarantees instead of claiming a database transaction rolls back the remote effect.
 
@@ -140,7 +141,7 @@ Settings follow the existing project approach. If `pydantic-settings` v2 is alre
 
 ## Isolated tests and override cleanup
 
-Runnable snippet `fastapi-offline-test`: save as `test_example_app.py` next to `example_app.py`. Requires the app snippet, pytest, and compatible FastAPI/Starlette/HTTPX `TestClient` dependencies. It checks upstream failure/timeout mapping, private-detail exclusion, lifespan cleanup, and override restoration. MockTransport is an explicit test double, not application fallback data; no network request is made.
+Runnable snippet `fastapi-offline-test`: save as `test_example_app.py` next to `example_app.py`. Requires the app snippet, pytest, and compatible FastAPI/Starlette/HTTPX `TestClient` dependencies (Starlette 1.2+ can also drive `TestClient` with `httpx2`; follow whichever the project installs). It checks upstream failure/timeout mapping, private-detail exclusion, lifespan cleanup, and override restoration. MockTransport is an explicit test double, not application fallback data; no network request is made.
 
 ```python
 from collections.abc import AsyncIterator
@@ -199,6 +200,7 @@ When execution is authorized, use existing checks and exercise the affected cont
 These rules are authored synthesis, not a copy of upstream policy. Read references selectively for the relevant feature and installed versions:
 - [FastAPI official skill](https://github.com/fastapi/fastapi/blob/master/fastapi/.agents/skills/fastapi/SKILL.md): researched guidance on typed dependencies, public responses, and async boundaries. Its `master` advice changes and may describe APIs absent locally; library/tool preferences are not adoption requirements here.
 - [FastAPI async technical details](https://fastapi.tiangolo.com/async/#very-technical-details): managed endpoints/dependencies versus directly called helpers.
+- [FastAPI release notes](https://fastapi.tiangolo.com/release-notes/): breaking changes between the locked and target versions.
 - [FastAPI lifespan](https://fastapi.tiangolo.com/advanced/events/) and [dependencies with yield](https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/): resource lifecycle and version-sensitive teardown.
 - [FastAPI response models](https://fastapi.tiangolo.com/tutorial/response-model/): validation and public-field filtering.
 - [Dependency overrides](https://fastapi.tiangolo.com/advanced/testing-dependencies/) and [async tests](https://fastapi.tiangolo.com/advanced/async-tests/): dependency replacement and lifespan caveats.
