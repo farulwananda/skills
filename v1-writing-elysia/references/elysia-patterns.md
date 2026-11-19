@@ -1,6 +1,6 @@
 # Elysia Backend Patterns
 
-Official lifecycle, plugin, validation, error, and runtime documentation consulted on 2026-10-15. This is independent synthesis; current docs are not proof of an installed release's API. Inspect the lockfile, exported types, and matching release docs before changing `status`, hooks/macros, schemas, plugin namespaces, or adapters.
+Official lifecycle, plugin, validation, error, and runtime documentation consulted on 2026-10-15 and rechecked 2026-11-20 (npm `latest` is Elysia 1.4.x; Elysia 2 is a rewrite published only under `next`/`rc`/`experimental` tags). This is independent synthesis; current docs are not proof of an installed release's API. Inspect the lockfile, exported types, and matching release docs before changing `status`, hooks/macros, schemas, plugin namespaces, or adapters. Do not adopt or migrate to an Elysia 2 pre-release unless the task explicitly selects it.
 
 ## Contents
 
@@ -177,7 +177,7 @@ Do not add retries as a general production requirement. A timeout or lost respon
 
 - Bun-only APIs such as `Bun.password`, `Bun.file`, or Bun server configuration belong only in a Bun deployment; they are not Elysia-portable facilities.
 - Current Node docs use `@elysia/node` and `node()`; use the namespace and API supported by the installed release rather than replacing an older working adapter automatically.
-- Current Cloudflare docs describe an experimental `elysia/adapter/cloudflare-worker` adapter, `.compile()` at export, and runtime/compatibility-date restrictions. Check the installed Elysia version and Wrangler config; do not copy a Bun `.listen()`, filesystem/static plugin, or old `aot: false` rule into a Worker.
+- Current Cloudflare docs describe an experimental `elysia/adapter/cloudflare-worker` adapter (`CloudflareAdapter`), `.compile()` before export, and a Wrangler `compatibility_date` of at least `2025-06-01`. Check the installed Elysia version and Wrangler config; do not copy a Bun `.listen()`, `Elysia.file`/static plugin, or OpenAPI type generation (all need `fs`) into a Worker. `aot: false` is only needed before Elysia 1.4.7.
 - `app.handle` in Bun tests validates lifecycle logic, not deploy-host compatibility. Use the repository's existing adapter integration tests for bindings, streaming, files, cookies, and shutdown semantics when relevant. Do not deploy to verify.
 
 ## Testing and Eden

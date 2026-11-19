@@ -1,4 +1,4 @@
 interface:
-  display_name: "FW Writing Elysia"
+  display_name: "V1 Writing Elysia"
   short_description: "Write focused, version-aware Elysia APIs"
-  default_prompt: "Use $fw-writing-elysia to inspect installed APIs and runtime adapters, then implement this backend change with explicit response contracts, scoped policies, and existing persistence ownership; avoid speculative dependencies or side effects."
+  default_prompt: "Use $v1-writing-elysia to inspect installed APIs and runtime adapters, then implement this backend change with explicit response contracts, scoped policies, and existing persistence ownership; avoid speculative dependencies or side effects."

@@ -1,9 +1,9 @@
 ---
-name: fw-writing-elysia
+name: v1-writing-elysia
 description: Use when writing, reviewing, or refactoring Elysia TypeScript backends, including version-compatible routes, plugins, lifecycle hooks, response schemas, Eden clients, runtime adapters, or Prisma and PostgreSQL persistence.
 ---
 
-# FW Writing Elysia
+# V1 Writing Elysia
 
 ## Overview
 

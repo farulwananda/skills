@@ -2,7 +2,7 @@
 
 Official plugin catalog, CORS/Eden package pages, and Node/Cloudflare integrations consulted on 2026-10-15. This is a capability index, not a default dependency list or a guarantee for older releases. Before a dependency change, inspect installed versions, lockfile, matching docs, peer constraints, and the deployment adapter. Do not install packages automatically.
 
-Current docs use `@elysia/*`; older repositories may use another official namespace. Keep the installed compatible set unless migration is requested; never rename imports merely because a current page differs.
+Current docs use `@elysia/*`; older repositories use `@elysiajs/*`, which is still published in parallel for most plugins. Keep the installed compatible set unless migration is requested; never rename imports merely because a current page differs. `@elysiajs/swagger` is the legacy predecessor of the OpenAPI plugin (last released 2025); do not add it to new work, but do not swap an installed one without a requested migration.
 
 ## Elysia, Web APIs, and Runtime-Specific Facilities
 

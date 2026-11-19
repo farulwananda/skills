@@ -6,9 +6,11 @@ Read this reference only when Prisma ORM or PostgreSQL is in scope. Verify the i
 
 Prisma is relevant when the project has already selected it, or the task explicitly selects persistence. Inspect the installed major, generated client, schema/config, adapter, pool ownership, and runtime before changing packages; do not install, generate, migrate, or provision a database automatically.
 
-The **versioned Prisma 7** Bun/PostgreSQL guide describes this path (not a current-major recommendation):
+Release state checked 2026-11-20: Prisma ORM 7 is the stable line (`@prisma/client` 7.x); Prisma 6 left security support on 2026-11-19; Prisma ORM 8 is a release candidate, yet npm's `latest` tag for the `prisma` CLI already resolves to the 8 RC. Prisma 8 uses per-database `@prisma/orm-*` packages, a CLI that does not read `schema.prisma` or provide `generate`/`migrate dev`, Node 22.18+/24.11+, and lacks several 7 client features (for example `$extends`, `P2002`-style codes). Never run `prisma@latest`/`npx prisma` unpinned in a 7 project; use the repository's locked CLI or pin `prisma@7`.
 
-- `prisma` as a development dependency;
+The **versioned Prisma 7** Bun/PostgreSQL guide describes this path:
+
+- `prisma` as a development dependency, pinned to the 7 line;
 - aligned `@prisma/client` and `@prisma/adapter-pg` versions;
 - `pg` plus its development types;
 - ESM and the `prisma-client` generator with an explicit output path;
@@ -108,11 +110,12 @@ If those answers are absent, keep the dependency out.
 
 ## Official Sources
 
-- [Prisma with Bun](https://www.prisma.io/docs/guides/v7/runtimes/bun)
+- [Prisma with Bun (v7)](https://www.prisma.io/docs/guides/v7/runtimes/bun)
+- [Prisma ORM release status](https://www.prisma.io/docs/prisma-orm/release-status): 6/7/8 support state; recheck before any major change.
 - [Prisma database drivers](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/database-drivers)
 - [Connection management](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/databases-connections/connection-management)
 - [Connection pooling](https://www.prisma.io/docs/orm/v7/prisma-client/setup-and-configuration/databases-connections/connection-pool)
 - [Versioned Prisma 7 documentation](https://www.prisma.io/docs/orm/v7): use this when the lockfile selects 7; inspect transaction and adapter ownership docs for that release.
 - [Current transaction documentation](https://www.prisma.io/docs/orm/fundamentals/transactions): checked for ownership principles only; current APIs must not be substituted into an older client.
 
-The versioned Bun guide and transaction ownership guidance were consulted on 2026-10-15. No live database, migrations, shutdown, or retry behavior was exercised by this documentation audit. These are boundary rules, not a runnable client setup or a guarantee across Prisma majors.
+The versioned Bun guide and transaction ownership guidance were consulted on 2026-10-15; release status was rechecked on 2026-11-20. No live database, migrations, shutdown, or retry behavior was exercised by this documentation audit. These are boundary rules, not a runnable client setup or a guarantee across Prisma majors.
