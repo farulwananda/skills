@@ -1,18 +1,18 @@
 ---
-name: fw-writing-express
+name: v1-writing-express
 description: Use when implementing or reviewing Express HTTP APIs in TypeScript. Covers version-aware request validation, async errors, security boundaries and server lifecycle without requiring a new architecture or dependency.
 license: MIT
 metadata:
   author: Farul Wananda backend conventions; TypeScript Express standards
 ---
 
-# FW Writing Express
+# V1 Writing Express
 
 ## Scope and repository checks
 
 Use for Express routing/middleware, HTTP contracts and lifecycle. Use the TypeScript skill for language decisions, not as a reason to reconfigure a working application.
 
-Inspect `package.json`, the lockfile, Express and `@types/express` major versions, Node support, middleware order, proxy/auth configuration, error responses and existing scripts. Match Express 4 versus 5 deliberately. A small handler does not need a controller class, service, repository, schema library or dependency-injection framework.
+Inspect `package.json`, the lockfile, Express and `@types/express` major versions, Node support, middleware order, proxy/auth configuration, error responses and existing scripts. Match Express 4 versus 5 deliberately: npm `latest` has been Express 5 since 5.1 (4.x is `latest-4`), so an unpinned install pulls 5 into a 4 codebase. On 5, prefer the current patched minor; 5.3 ships `qs`, `body-parser` and `proxy-addr` security fixes, and an invalid body `limit` now throws at startup instead of silently disabling enforcement. A small handler does not need a controller class, service, repository, schema library or dependency-injection framework.
 
 ## Version and validation boundaries
 
@@ -20,11 +20,12 @@ Inspect `package.json`, the lockfile, Express and `@types/express` major version
 - In Express 5, `req.query` is a getter, not a writable property. Do not replace it after parsing. Keep validated data in local variables or typed `res.locals`; do not mutate `req.params` either to simulate a domain object.
 - `req.body`, query and path values are untrusted. Reuse the installed validator when useful; infer types from the successful parse. A cast does not validate data.
 - Make middleware order explicit: body parsing when needed, authentication/authorization, validation, handlers, not-found handling, then four-argument error middleware. Authentication must still protect routes whose validation succeeds.
-- Check Express 5 route syntax and query-parser differences before migrations. Do not copy Express 4 wildcard patterns or assume nested query parsing.
+- Check Express 5 route syntax (path-to-regexp 8) and parser defaults before migrations. Wildcards must be named (`/*splat`, or `/{*splat}` to also match the root), optional segments use braces (`/:file{.:ext}`) instead of `?`, regexp syntax is unsupported (use an array of paths), and `()[]?+!` are reserved and must be escaped with `\`. The default query parser is `simple` (no nested objects), `express.urlencoded` defaults to `extended: false`, and `req.body` is `undefined` when no parser ran.
+- Express 5 removed `app.del`, `req.param()`, `res.sendfile`, `app.param(fn)`, the `res.json(obj, status)`/`res.jsonp(obj, status)`/`res.send(status)`/`res.send(body, status)`/`res.redirect(url, status)` signatures, the `'back'` redirect magic string and the singular `req.acceptsCharset`/`acceptsEncoding`/`acceptsLanguage` aliases; do not reintroduce them from old examples.
 
 ## Runnable Express 5 example
 
-Requires Express 5, matching Express types, Node 18+ and a TypeScript runner/compiler configured by the consuming repository. This app module has no database or external I/O and does not open a port on import. Its arithmetic endpoint demonstrates checked query input without rewriting the request; it is not an application blueprint.
+Requires Express 5, matching Express types, Node 18+ (Express's engine floor; deploy on a supported Node LTS) and a TypeScript runner/compiler configured by the consuming repository. This app module has no database or external I/O and does not open a port on import. Its arithmetic endpoint demonstrates checked query input without rewriting the request; it is not an application blueprint.
 
 ```typescript
 import express, { type ErrorRequestHandler } from 'express';
@@ -96,9 +97,10 @@ For lifecycle changes, start the actual bootstrap, send its shutdown signal, obs
 
 ## Sources and provenance
 
-Original project guidance, revised 2026-10-15; these are API references, not copied community templates:
+Original project guidance, revised 2026-10-15 and rechecked 2026-11-20; these are API references, not copied community templates:
 
 - [Express 5 migration](https://expressjs.com/en/guide/migrating-5/): query getter, route syntax and promise rejection changes; Node 18+ baseline.
 - [Express error handling](https://expressjs.com/en/guide/error-handling.html).
+- [Express release history](https://github.com/expressjs/express/blob/master/History.md): 5.x security and behavior changes.
 - [Express production security](https://expressjs.com/en/advanced/best-practice-security.html) and [proxy configuration](https://expressjs.com/en/guide/behind-proxies.html).
 - [Node HTTP server lifecycle](https://nodejs.org/api/http.html#serverclosecallback): check installed-version support before using connection-closing helpers.
