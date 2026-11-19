@@ -1,16 +1,16 @@
 ---
-name: fw-writing-cloudflare
+name: v1-writing-cloudflare
 description: Use when building, configuring, or reviewing Cloudflare Workers, Pages, static assets, or existing D1, KV, and R2 bindings. Covers version-aware routing, generated binding types, runtime limits, local development, cache isolation, and authorized deployment boundaries.
 license: MIT
 metadata:
   author: Farul Wananda Cloudflare conventions; serverless edge engineering
 ---
 
-# FW Writing Cloudflare
+# V1 Writing Cloudflare
 
 ## Scope and repository inspection
 
-Use for Cloudflare runtime and hosting concerns, not as a mandate to use Cloudflare, introduce storage, or replace framework architecture. Inspect package.json/lockfile, installed Wrangler and framework adapter versions, scripts, existing Wrangler configuration, generated type files, compatibility date/flags, routes, environment names, migrations, and deployment instructions before changing anything. Keep a working TOML configuration unless a real requirement calls for conversion; JSONC is useful for schema tooling but not mandatory.
+Use for Cloudflare runtime and hosting concerns, not as a mandate to use Cloudflare, introduce storage, or replace framework architecture. Inspect package.json/lockfile, installed Wrangler and framework adapter versions, scripts, existing Wrangler configuration, generated type files, compatibility date/flags, routes, environment names, migrations, and deployment instructions before changing anything. Keep a working TOML configuration unless a real requirement calls for conversion; Cloudflare recommends `wrangler.jsonc` for new projects and some newer Wrangler features are JSON-only; check whether a needed feature requires it before converting.
 
 Workers run in isolates, not a full Node.js host. Check each dependency's actually used APIs against the installed tooling and configured runtime. `nodejs_compat` does not implement every Node API: some modules are partial implementations or importable stubs whose operations throw or no-op. Whether a flag is needed also depends on the compatibility date; do not add it or advance the date indiscriminately. Current docs describe Node compatibility enabled by default from 2026-08-04, whereas earlier date ranges require explicit opt-in. Preserve and verify the project's compatibility policy rather than copying a new date.
 
@@ -26,7 +26,7 @@ Do not combine these into a universal configuration:
 | Explicit client-routed SPA | Use `single-page-application` fallback only when the application's client router owns unknown navigation paths. Keep API failures and protected paths out of that fallback. |
 | Worker API | Worker `main` and generated binding types; no assets/SPA configuration unless it actually serves a UI. |
 | Adapter-generated SSR/full-stack framework | Use the installed adapter/plugin's generated entrypoint, asset directory, config redirection, and deployment command. Do not overwrite these with generic `main: src/index.ts` or assume `dist` is entirely static. |
-| Existing Pages deployment | Retain Pages-specific build output and Functions conventions; do not silently migrate it to Workers. Its routing and fallback defaults differ. |
+| Existing Pages deployment | Retain Pages-specific build output and Functions conventions; do not silently migrate it to Workers. Its routing and fallback defaults differ. Pages remains supported, but Cloudflare points new projects to Workers static assets and some features (e.g. Workers Logs, gradual deployments) are Workers-only. |
 
 **CF-STATIC-CONFIG** — complete standalone `wrangler.jsonc` for Workers static assets. Requires an existing `dist/` static build; include `dist/404.html` for a custom error page. The example date is a pinned example, not an upgrade instruction:
 
@@ -47,13 +47,13 @@ Do not combine these into a universal configuration:
 
 For an intentional SPA, change only its asset fallback to `single-page-application` after confirming client routing and deep-link behavior. When mixing Worker APIs and assets, inspect the installed version's routing precedence. Asset-first serving can bypass the Worker; use supported `run_worker_first` path selection for routes that require API/auth execution, and implement their explicit 404s. A protected file must not remain publicly available via a second asset path. SPA navigations and API fetches can have different fallback behavior; test both, not just the homepage.
 
-For Astro SSR specifically, inspect the installed `@astrojs/cloudflare` docs: newer adapters generate configuration through the Cloudflare Vite plugin, while older adapters use different output/runtime access patterns. Keep generated configuration generated. Static Astro needs no SSR adapter; server features do. Adapter image/session bindings can introduce resource usage or automatic provisioning at deployment: review before authorizing it.
+For Astro SSR specifically, inspect the installed `@astrojs/cloudflare` docs: newer adapters (13+, Astro 6+) build through the Cloudflare Vite plugin, run `astro dev` in `workerd`, target Workers only (not Pages), and read bindings via `import { env } from 'cloudflare:workers'` instead of `Astro.locals.runtime`; older adapters use different output/runtime access patterns. Keep generated configuration generated. Static Astro needs no SSR adapter; server features do. Adapter image/session bindings can introduce resource usage or automatic provisioning at deployment: review before authorizing it.
 
 ## Generated types, not a parallel Env definition
 
-Use the repository's installed Wrangler command through its package manager or existing script, not an executor that may auto-download a newer binary. Wrangler 4's `wrangler types` normally writes `worker-configuration.d.ts`, including binding and runtime types matched to configuration/date/flags. Older Wrangler versions have different runtime-type support; read their command help/documentation. Regenerate after binding/config changes, include the generated file in tsconfig, and never hand-edit it or duplicate binding declarations in a drifting `interface Env`.
+Use the repository's installed Wrangler command through its package manager or existing script, not an executor that may auto-download a newer binary. Wrangler 4's `wrangler types` normally writes `worker-configuration.d.ts`, including binding and runtime types matched to configuration/date/flags. Older Wrangler versions have different runtime-type support; read their command help/documentation. Use it instead of `@cloudflare/workers-types` for Worker code (that package remains for libraries/shared packages). Regenerate after binding/config changes, list the generated file in tsconfig `compilerOptions.types` (plus `node` with `@types/node` when using Node compatibility), use `wrangler types --check` in CI where supported, and never hand-edit it or duplicate binding declarations in a drifting `interface Env`.
 
-Use the environment type/name produced by the installed generator (`Env` in this example); newer tooling also exposes `Cloudflare.Env`. Add only source-owned application augmentations through that version's supported mechanism. Generate for the selected environment where environment bindings differ. Secrets may need explicit supported declarations when not inferred from local secrets/configuration; do not invent production values just to satisfy types.
+Use the environment type/name produced by the installed generator (`Env` in this example); newer tooling also exposes `Cloudflare.Env`. Add only source-owned application augmentations through that version's supported mechanism. Generate for the selected environment where environment bindings differ. Secrets may need explicit declarations when not inferred from local secrets/configuration (newer Wrangler supports a `secrets.required` list that is validated at dev/deploy and used for types); do not invent production values just to satisfy types.
 
 **CF-API-CONFIG** — complete alternative `wrangler.jsonc`, not merged with CF-STATIC-CONFIG:
 
@@ -125,13 +125,13 @@ For HTTP invocations, current Workers documentation allows up to 30 seconds of p
 
 ## Verification and reporting
 
-When authorized, use existing repository checks plus installed local Wrangler/runtime preview. Generate binding types before checks that depend on them. Exercise health/method/unknown-route responses, static deep links and real 404s, SPA fallback only where intended, API routing precedence, public versus authenticated/tenant cache isolation, secret exclusion, and streamed cancellation/background failures. Local emulation does not prove production routing, limits, remote binding permissions, or cache behavior. Report exact commands run, selected environment/date/tool versions, and unverified remote behavior. Never deploy or access remote data as an implicit smoke test.
+When authorized, use existing repository checks plus installed local Wrangler/runtime preview. Generate binding types before checks that depend on them. Exercise health/method/unknown-route responses, static deep links and real 404s, SPA fallback only where intended, API routing precedence, public versus authenticated/tenant cache isolation, secret exclusion, and streamed cancellation/background failures. Local emulation does not prove production routing, limits, remote binding permissions, or cache behavior. Workers Logs (`observability`) default to enabled for new Workers; keep the existing setting and sampling rate rather than toggling it, and never log secrets or private payloads. Report exact commands run, selected environment/date/tool versions, and unverified remote behavior. Never deploy or access remote data as an implicit smoke test.
 
 ## Sources and provenance
 
 Author synthesis informed by primary documentation and selective public references, not bulk-copied third-party skill content. Read only relevant sections and match installed versions:
 
-- Official Cloudflare: [asset routing modes](https://developers.cloudflare.com/workers/static-assets/routing/), [HTML handling](https://developers.cloudflare.com/workers/static-assets/routing/advanced/html-handling/), [Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/).
+- Official Cloudflare: [asset routing modes](https://developers.cloudflare.com/workers/static-assets/routing/), [HTML handling](https://developers.cloudflare.com/workers/static-assets/routing/advanced/html-handling/), [Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/), [migrating from Pages](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/).
 - Official Cloudflare: [generated TypeScript types](https://developers.cloudflare.com/workers/languages/typescript/), [Node compatibility and limitations](https://developers.cloudflare.com/workers/runtime-apis/nodejs/), [context and waitUntil](https://developers.cloudflare.com/workers/runtime-apis/context/), [Cache API](https://developers.cloudflare.com/workers/runtime-apis/cache/).
 - Official Astro: [Cloudflare adapter](https://docs.astro.build/en/guides/integrations-guide/cloudflare/) for framework-generated SSR boundaries.
 - [cloudflare/skills](https://github.com/cloudflare/skills) is Cloudflare's public agent-guidance repository, a researched reference rather than the source of this author's custom policy or a guarantee for every installed version. Do not copy its installation commands or provision services just because they appear in guidance.
