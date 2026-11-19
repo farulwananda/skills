@@ -1,16 +1,16 @@
 ---
-name: fw-writing-go-api
-description: Use when building, reviewing, or operating Go HTTP/REST APIs, including net/http or Chi routing, project-selected databases such as MySQL or PostgreSQL, GORM or SQL persistence, HTTP contracts, authentication, transactions, production lifecycle and deployment readiness. Keep architecture proportional; pair with fw-writing-go for language and concurrency rules.
+name: v1-writing-go-api
+description: Use when building, reviewing, or operating Go HTTP/REST APIs, including net/http or Chi routing, project-selected databases such as MySQL or PostgreSQL, GORM or SQL persistence, HTTP contracts, authentication, transactions, production lifecycle and deployment readiness. Keep architecture proportional; pair with v1-writing-go for language and concurrency rules.
 license: MIT
 metadata:
   author: Farul Wananda Go API conventions
 ---
 
-# FW Writing Go API
+# V1 Writing Go API
 
 ## Scope and first inspection
 
-Use for Go HTTP APIs and their production boundaries. Use [Go language guidance](../fw-writing-go/SKILL.md) for errors, concurrency and ownership; this skill does not replace it. Not a mandate to rewrite a CLI, replace a working router/ORM, introduce microservices, or deploy anything.
+Use for Go HTTP APIs and their production boundaries. Use [Go language guidance](../v1-writing-go/SKILL.md) for errors, concurrency and ownership; this skill does not replace it. Not a mandate to rewrite a CLI, replace a working router/ORM, introduce microservices, or deploy anything.
 
 Inspect `go.mod`/`go.sum`, Go/toolchain and CI versions, actual router/driver APIs, application bootstrap, routes/middleware, auth/proxy topology, database schema, tests and deployment runbook before editing. Establish the endpoint's request/response contract, permissions, side effects, deadlines and compatibility requirements. Never infer business requirements from the words "production" or "enterprise".
 
@@ -50,12 +50,12 @@ YAGNI and KISS are the baseline. Consider domain complexity, data/financial risk
 ## HTTP contract and security
 
 - Keep request DTOs and explicit public response fields separate from internal/database shapes where they differ. Validation never grants authorization.
-- Limit request bodies with `http.MaxBytesReader`, bound headers/list sizes/uploads, check content type, and define empty/null/malformed/multiple-value JSON behavior. `Content-Length` alone is not enforcement. Use unknown-field rejection only for an intentionally closed contract; `encoding/json` does not reject duplicate keys by default.
+- Limit request bodies with `http.MaxBytesReader`, bound headers/list sizes/uploads, check content type, and define empty/null/malformed/multiple-value JSON behavior. `Content-Length` alone is not enforcement. Use unknown-field rejection only for an intentionally closed contract; `encoding/json` does not reject duplicate keys by default (Go 1.27's `encoding/json/v2` does; it is the new-code recommendation there, but do not migrate a contract silently).
 - Encode/validate output before writing headers when serialization can fail. Once committed, do not attempt to replace the status with a fresh JSON error. Streaming needs its own failure/cancellation contract.
 - Define status/error semantics consistently: malformed input 400, unauthenticated 401, unauthorized 403, not found 404, conflict 409, payload too large 413, unsupported media type 415, known dependency failures 502/503/504 as appropriate, unexpected server errors 500. Preserve the established contract rather than blindly standardizing it.
 - Keep errors public-safe; retain useful causes in redacted server diagnostics. Do not log tokens, DSNs, cookies, authorization headers, raw private payloads or SQL arguments. Bound client-supplied correlation IDs and use route templates, not secret/high-cardinality URLs, for telemetry.
 - Enforce authorization and tenant/owner scope on every read/write, not only at router-group registration. Test negative/sibling routes. Use parameterized SQL; allowlist dynamic SQL identifiers and sort keys.
-- Same-origin APIs may need no CORS. Cross-origin credentials need an explicit allowlist and deliberate cookie/CSRF policy. CORS is not authentication. Trust forwarded identity/IP/host headers only from configured ingress; do not blindly trust Chi RealIP-style middleware.
+- Same-origin APIs may need no CORS. Cross-origin credentials need an explicit allowlist and deliberate cookie/CSRF policy; on Go 1.25+, `http.CrossOriginProtection` provides Fetch-metadata-based CSRF checks for unsafe methods. CORS is not authentication. Trust forwarded identity/IP/host headers only from configured ingress; do not blindly trust Chi RealIP-style middleware.
 - Authenticated/private responses must bypass shared cache reads/writes and follow the intended `private, no-store` policy. A URL-only cache or `Vary` alone does not establish tenant isolation.
 - Reuse appropriate secure headers and the host's TLS configuration. Do not expose pprof, metrics, admin endpoints or detailed dependency errors publicly by default.
 
@@ -79,10 +79,10 @@ Report exact commands/versions exercised, assumptions and unverified DB/provider
 
 ## Sources and provenance
 
-Original project guidance, created 2026-10-15; independent synthesis, not copied third-party skill text. Consult installed-version documentation selectively:
+Original project guidance, created 2026-10-15, revised 2026-11-20; independent synthesis, not copied third-party skill text. Consult installed-version documentation selectively:
 
 - [Go release/support policy](https://go.dev/doc/devel/release), [net/http](https://pkg.go.dev/net/http) and [Go 1.22 routing changes](https://go.dev/blog/routing-enhancements).
-- [Chi](https://github.com/go-chi/chi): optional router composed with standard HTTP handlers.
-- [GORM database drivers and pools](https://gorm.io/docs/connecting_to_the_database.html), [transactions](https://gorm.io/docs/transactions.html), [updates](https://gorm.io/docs/update.html): MySQL/PostgreSQL are supported choices; match installed APIs.
+- [Chi](https://github.com/go-chi/chi): optional router composed with standard HTTP handlers; recent v5 releases raise the minimum Go version, so check its `go.mod` against the project's.
+- [GORM database drivers and pools](https://gorm.io/docs/connecting_to_the_database.html), [generics API](https://gorm.io/docs/the_generics_way.html) (v1.30+), [transactions](https://gorm.io/docs/transactions.html), [updates](https://gorm.io/docs/update.html): MySQL/PostgreSQL are supported choices; match installed APIs.
 - [pgx](https://github.com/jackc/pgx) for PostgreSQL only, [sqlc transactions](https://docs.sqlc.dev/en/stable/howto/transactions.html) when SQL generation is selected, [Goose](https://pressly.github.io/goose/).
 - [Structured logging with slog](https://go.dev/blog/slog). More detailed operational sources are linked in the production reference.

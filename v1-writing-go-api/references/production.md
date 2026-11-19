@@ -25,9 +25,9 @@ A Go net/http binary needs a host that runs Go processes/containers. Standard Cl
 
 ## GORM-specific safeguards
 
-GORM is an accepted implementation choice, not a reason to create repository/interfaces around every model. Follow the installed API style: traditional GORM and newer generics APIs differ; do not mechanically migrate code or assume both exist.
+GORM is an accepted implementation choice, not a reason to create repository/interfaces around every model. Follow the installed API style: traditional GORM and the generics API (`gorm.G[T](db)`, GORM v1.30+, context passed to terminal methods such as `First(ctx)`) differ; do not mechanically migrate code or assume both exist.
 
-- Carry request context through the supported API, such as `WithContext(ctx)` in traditional GORM. Start each request/query from an appropriate clean session; do not share a mutated chain and accidentally retain another request's filters.
+- Carry request context through the supported API: `WithContext(ctx)` in traditional GORM, the `ctx` argument in the generics API. Start each request/query from an appropriate clean session; do not share a mutated chain and accidentally retain another request's filters.
 - Scope queries/updates/deletes by authorized tenant/owner and trusted identity. Map request fields explicitly; do not bind untrusted input directly into a persistence model or turn on global updates to bypass missing conditions.
 - Traditional struct `Updates` omits zero values by default. For intended `false`, `0` or empty-string changes, use an explicit writable-field map or field selection while preserving PATCH omitted-versus-present semantics. Do not use `Save` as a generic scoped update: its upsert behavior can create an unintended row.
 - Check the actual returned error and affected-row semantics for the selected driver/API. Preserve soft-delete, hooks, associations and error translation intentionally. Avoid unbounded association loading/N+1 queries; inspect generated SQL and indexes before adding cache or raw SQL.
@@ -79,9 +79,9 @@ Use a returning run function so cleanup completes before main selects an exit co
 
 Use a supported Go line at its latest reviewed patch. Pin the compiler, dependency versions and build/runtime images through the project's release policy. Run proportionate focused checks, `go vet`, race checks where supported and `govulncheck` when the existing toolchain provides it; do not auto-install scanners or rewrite CI for an unrelated endpoint change.
 
-For container delivery, use a multi-stage build where useful, a non-root runtime, minimal writable paths and proper signal forwarding. A static binary depends on the actual CGO/native dependencies; do not assume `CGO_ENABLED=0` works for every application. Supply CA roots for outbound TLS and other runtime data only when required. Do not disable certificate verification to make a minimal image work. Keep secrets out of source, build args, image layers and logs. Apply resource limits and an existing restart policy; no automatic Kubernetes requirement.
+For container delivery, use a multi-stage build where useful, a non-root runtime, minimal writable paths and proper signal forwarding. A static binary depends on the actual CGO/native dependencies; do not assume `CGO_ENABLED=0` works for every application. Supply CA roots for outbound TLS and other runtime data only when required. Do not disable certificate verification to make a minimal image work. Keep secrets out of source, build args, image layers and logs. Apply resource limits and an existing restart policy; no automatic Kubernetes requirement. On Linux, Go 1.25+ lowers the default `GOMAXPROCS` to the cgroup CPU limit (gated by the main module's `go` line via the `containermaxprocs` GODEBUG, and skipped when `GOMAXPROCS` is set explicitly); do not assume older builds are container-aware.
 
-Verify endpoint behavior with real local HTTP in addition to handler tests. Use an isolated instance of the selected database engine/version for constraints, transaction/rollback, migrations, dialect/collation/locking and tenant isolation; prohibit shared/production resets. SQLite or query-generation-only tests do not prove MySQL/PostgreSQL server semantics. Exercise SIGTERM with an in-flight request and observe listener closure, drain completion, background resource closure and the exit result. Load-test only when capacity is in scope and the target is safe; routing benchmarks do not prove application throughput or production readiness.
+Verify endpoint behavior with real local HTTP in addition to handler tests. Use an isolated instance of the selected database engine/version for constraints, transaction/rollback, migrations, dialect/collation/locking and tenant isolation; prohibit shared/production resets. SQLite or query-generation-only tests do not prove MySQL/PostgreSQL server semantics. For deterministic timeout/cancellation tests, Go 1.25+ `testing/synctest` (with Go 1.27's in-memory `httptest.NewTestServer`) can replace sleeps; it does not replace a real-listener smoke. Exercise SIGTERM with an in-flight request and observe listener closure, drain completion, background resource closure and the exit result. Load-test only when capacity is in scope and the target is safe; routing benchmarks do not prove application throughput or production readiness.
 
 ## Database policy verification
 
@@ -89,9 +89,9 @@ On 2026-10-15, four instruction-level smoke probes exercised explicit MySQL + GO
 
 ## Primary references
 
-Author synthesis, recorded 2026-10-15; match documentation to installed versions:
+Author synthesis, recorded 2026-10-15, revised 2026-11-20; match documentation to installed versions:
 
-- [net/http server and Shutdown](https://pkg.go.dev/net/http), [context](https://pkg.go.dev/context), [Go support policy](https://go.dev/doc/devel/release).
+- [net/http server and Shutdown](https://pkg.go.dev/net/http), [context](https://pkg.go.dev/context), [Go support policy](https://go.dev/doc/devel/release), [Go 1.25 container-aware GOMAXPROCS](https://go.dev/doc/go1.25#container-aware-gomaxprocs).
 - [GORM database drivers and pools](https://gorm.io/docs/connecting_to_the_database.html), [transactions](https://gorm.io/docs/transactions.html), [update semantics](https://gorm.io/docs/update.html). GORM supports both MySQL and PostgreSQL; examples do not authorize automatic migration or dependency installation.
 - [GORM context propagation](https://gorm.io/docs/context.html) and [method chaining/session reuse](https://gorm.io/docs/method_chaining.html): follow installed traditional/generics APIs and avoid cross-request condition pollution.
 - [pgx](https://github.com/jackc/pgx), [pgxpool](https://pkg.go.dev/github.com/jackc/pgx/v5/pgxpool) for PostgreSQL, [sqlc transactions](https://docs.sqlc.dev/en/stable/howto/transactions.html) for the selected generator. Generated transaction helpers bind an owner; they do not define business isolation guarantees.

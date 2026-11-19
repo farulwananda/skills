@@ -8,7 +8,7 @@ It demonstrates a public, bounded arithmetic endpoint—not persistence, authent
 
 - Default bind: `127.0.0.1:8080`; `HTTP_ADDR` can override it. Local loopback is intentional. Production exposure, TLS and ingress policy require a separate host decision.
 - `POST /v1/square` accepts one JSON object with required integer `value` between -1,000,000 and 1,000,000; returns its exact int64 square. The 1 KiB body budget includes trailing data/whitespace consumed while checking EOF.
-- Unknown fields, malformed JSON, wrong field types, missing/null values and extra JSON values are rejected. Standard encoding/json permits duplicate keys and matches struct field names case-insensitively; this is not a strict duplicate-key or case-sensitive parser.
+- Unknown fields, malformed JSON, wrong field types, missing/null values and extra JSON values are rejected. Standard encoding/json permits duplicate keys and matches struct field names case-insensitively (unchanged in Go 1.27, where v1 is backed by v2 with v1 options); this is not a strict duplicate-key or case-sensitive parser. Use `encoding/json/v2` only when the module targets Go 1.27+ and the contract intends its stricter defaults.
 - Parse/shape/range errors use 400, oversized consumed bodies 413 and unsupported media types 415. `ServeMux` retains its standard text 404/405 and Allow behavior; there is no claim of a global JSON error envelope. GET patterns also serve HEAD in Go's modern mux.
 - `/healthz` is process liveness; `/readyz` represents only this dependency-free example's drain state, not database readiness. Both use GET/HEAD.
 - Header/body/write/idle and drain limits are explicit example values, not deployment defaults. Streaming/upload routes need different policy. The arithmetic handler has no blocking downstream work; real downstream work must use request context/deadlines and appropriate admission limits.
@@ -177,7 +177,7 @@ Use actual local requests as smoke evidence. Permanent regression tests should t
 
 On 2026-10-15, the exact source above passed `go vet ./...` and `go build -race` on Go 1.27.1, darwin/arm64. The built binary was exercised through real loopback HTTP: arithmetic/range/type/null/shape validation, the exact body boundary and oversized trailing whitespace, content types, 404/405/HEAD, bind failure, an in-flight request completing after SIGTERM, drain-timeout failure, and second-signal termination. No race report was observed.
 
-This is sample evidence, not a production toolchain pin: the upstream release page already lists Go 1.27.2 with security fixes. Use the current supported patch for a production build. MySQL/PostgreSQL or other database/ORM integrations, authentication, ingress/TLS, deployment, load and backup restoration were not exercised by this dependency-free smoke.
+This is sample evidence, not a production toolchain pin: as of 2026-11-20 the upstream release page lists Go 1.27.4 and 1.26.11 (2026-11-10) with security fixes, including `net/http`. Use the current supported patch for a production build. MySQL/PostgreSQL or other database/ORM integrations, authentication, ingress/TLS, deployment, load and backup restoration were not exercised by this dependency-free smoke.
 
 ## Sources and provenance
 
