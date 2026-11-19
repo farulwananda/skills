@@ -1,21 +1,21 @@
 ---
-name: fw-writing-python
+name: v1-writing-python
 description: Use when writing, reviewing, or refactoring Python applications, scrapers, pipelines, CLIs, workers, or libraries. Follow the repository's Python version and tooling; emphasize explicit contracts, bounded concurrency, honest missing data, and resource cleanup.
 license: MIT
 metadata:
   author: Farul Wananda Python conventions; modern software engineering
 ---
 
-# FW Writing Python
+# V1 Writing Python
 
 ## Scope and repository context
 
 Use this skill for Python language and library code. For HTTP routing, dependency injection, framework lifecycle, or deployment, use the matching framework skill as well. Do not impose web-service architecture on a script or library.
 
 Before editing:
-- Inspect `pyproject.toml`, lockfiles, interpreter constraints, CI, nearby code, and existing tests. Confirm the runtime and installed dependency versions in the project's environment; a system interpreter is not evidence of the deployed version.
-- Preserve the supported Python range. Built-in generics require 3.9+, `X | None` requires 3.10+, `TaskGroup`, `asyncio.timeout`, and `Self` require 3.11+, and `class Name[T]` syntax requires 3.12+. Do not raise the minimum version just to modernize syntax.
-- Reuse the current package manager, test runner, formatter, type checker, and dependencies. Do not install Ruff, uv, Pydantic, browser tooling, retry libraries, or async-test plugins automatically.
+- Inspect `pyproject.toml` (including `requires-python` and any PEP 735 `[dependency-groups]`), lockfiles (`uv.lock`, `poetry.lock`, PEP 751 `pylock.toml`, pinned requirements), interpreter constraints, CI, nearby code, and existing tests. Confirm the runtime and installed dependency versions in the project's environment; a system interpreter is not evidence of the deployed version.
+- Preserve the supported Python range. Built-in generics require 3.9+, `X | None` requires 3.10+, `TaskGroup`, `asyncio.timeout`, and `Self` require 3.11+, `class Name[T]` / `type` alias syntax requires 3.12+, and type-parameter defaults require 3.13+. Python 3.14 defers annotation evaluation (PEP 649/749; use `annotationlib` for runtime introspection), and 3.15 adds `lazy import` (PEP 810), `frozendict`, and UTF-8 default mode (PEP 686)—keep passing `encoding=` while older interpreters are supported. Do not raise the minimum version just to modernize syntax.
+- Reuse the current package manager, test runner, formatter, type checker, and dependencies. Do not install Ruff, uv, ty/mypy/pyright, Pydantic, browser tooling, retry libraries, or async-test plugins automatically.
 - Read the actual input/output and failure contracts before choosing concurrency, retries, data models, or extra layers.
 
 ## Language and data contracts
@@ -72,7 +72,7 @@ def parse_article(raw: str) -> Article:
 ## Concurrency and deadlines
 
 - Keep sequential work sequential unless concurrency has a reason. Async is useful for awaitable I/O; calling blocking code inside `async def` still blocks the event loop. A normal helper is not automatically offloaded.
-- For unavoidable blocking I/O, use an existing executor boundary or `asyncio.to_thread` where the runtime supports it. Cancellation does not stop the underlying thread; keep the library's own timeout and bound submitted work. Threads do not generally make pure-Python CPU work parallel under the GIL.
+- For unavoidable blocking I/O, use an existing executor boundary or `asyncio.to_thread` where the runtime supports it. Cancellation does not stop the underlying thread; keep the library's own timeout and bound submitted work. Threads do not generally make pure-Python CPU work parallel under the GIL; the free-threaded build (officially supported since 3.14, still opt-in) changes that only when the deployment actually uses it and its extensions support it.
 - Bound active operations **and task creation**. A semaphore around millions of pre-created tasks does not bound memory. For streams, use a bounded queue and a fixed number of workers; for small finite batches, chunking is sufficient.
 - On Python 3.11+, use `TaskGroup` when sibling cancellation and grouped failures match the contract. It is not a mechanical replacement for `gather`: `gather` has different failure behavior. Decide whether results are all-or-nothing or explicitly partial.
 
@@ -131,6 +131,7 @@ Report changed behavior, supported versions, checks actually run, and unresolved
 ## Sources and selective follow-up
 
 Authored synthesis of the primary sources below; consult the documentation for the **target interpreter version**, not unconditionally the newest release:
+- [What's New in Python](https://docs.python.org/3/whatsnew/index.html) and [release status](https://devguide.python.org/versions/): feature availability and supported versions per interpreter.
 - [Python typing](https://docs.python.org/3/library/typing.html) and [dataclasses](https://docs.python.org/3/library/dataclasses.html): compatibility and record semantics.
 - [Python 3.11 asyncio tasks](https://docs.python.org/3.11/library/asyncio-task.html): task groups, cancellation, timeouts, and thread offloading.
 - [Python exception handling and chaining](https://docs.python.org/3.11/tutorial/errors.html): precise recovery and preserved causes.
