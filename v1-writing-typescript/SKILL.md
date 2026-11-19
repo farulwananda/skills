@@ -1,18 +1,20 @@
 ---
-name: fw-writing-typescript
+name: v1-writing-typescript
 description: Use when writing, reviewing, or refactoring TypeScript types, utilities, runtime boundaries, or compiler configuration. Prefer sound narrowing and repository-native conventions; defer framework and deployment contracts to their matching skills.
 license: MIT
 metadata:
   author: Farul Wananda TypeScript conventions
 ---
 
-# FW Writing TypeScript
+# V1 Writing TypeScript
 
 ## Scope and repository checks
 
 Use for language and runtime-boundary decisions, not as an application architecture template. Framework behavior belongs to the React, Astro, Express, Elysia, or Cloudflare skill.
 
 Before editing, inspect the installed TypeScript version, package manager/lockfile, `package.json` module type, inherited `tsconfig`, runtime, nearby types and verification scripts. Follow the existing validation/error conventions. Do not install Zod, introduce branded types, or change compiler/module settings merely because this skill is loaded.
+
+TypeScript 7 (native Go port, stable since July 2026) ships `tsc` without the programmatic compiler API until 7.1. Tooling that imports `typescript` (typescript-eslint, Astro/Vue/Svelte/MDX/Volar editors, Angular templates) may still require TypeScript 6.0, often via `@typescript/typescript6`. Check which major each tool actually resolves before upgrading or diagnosing errors.
 
 ## Runtime validation and narrowing
 
@@ -57,11 +59,11 @@ Do not replace a framework-generated or inherited configuration with a universal
 
 | Execution model | Decision |
 | --- | --- |
-| Node executes emitted JavaScript | Match Node version and ESM/CJS package format; modern `NodeNext` resolution models Node's file-extension and package-export rules. |
+| Node executes emitted JavaScript | Match Node version and ESM/CJS package format; modern `NodeNext` resolution models Node's file-extension and package-export rules. Legacy `node`/`node10` resolution is deprecated in 6.0 and removed in 7.0. |
 | Vite/Astro or another bundler resolves imports | Keep the framework's configuration; `bundler` resolution requires TypeScript 5.0+ and a compatible module setting. |
 | Bun, Workers, or test runner | Match actual runtime/tooling and generated types; do not assume every Node or DOM API exists. |
 
-Prefer `strict` for new code. Tightening existing settings such as `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, or `verbatimModuleSyntax` is a separately scoped migration: inspect affected callers first. `paths` aliases do not by themselves rewrite emitted imports or teach the runtime how to resolve them.
+Prefer `strict` for new code. TypeScript 6.0+ changes defaults (`strict: true`, `module: esnext`, latest `target`, `types: []`, `rootDir` = config directory, `noUncheckedSideEffectImports: true`); an unset option may mean different things across majors, so set load-bearing ones explicitly. 6.0 deprecates and 7.0 removes `baseUrl`, `target: es5`, `downlevelIteration`, `outFile`, AMD/UMD/System modules, and `false` for `esModuleInterop`/`allowSyntheticDefaultImports`/`alwaysStrict`; `ignoreDeprecations: "6.0"` only defers that. Tightening existing settings such as `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, or `verbatimModuleSyntax` is a separately scoped migration: inspect affected callers first. `paths` entries without `baseUrl` resolve relative to the config file. `paths` aliases do not by themselves rewrite emitted imports or teach the runtime how to resolve them.
 
 ## Verification
 
@@ -71,8 +73,9 @@ Use consumer-visible boundary/error cases, not tests that pin source text, type 
 
 ## Sources and provenance
 
-Original project guidance, revised 2026-10-15; linked sources are references, not vendored skill text. Match their API guidance to installed versions:
+Original project guidance, revised 2026-11-20; linked sources are references, not vendored skill text. Match their API guidance to installed versions:
 
 - [TypeScript narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html), including property narrowing introduced in 4.9.
+- [Announcing TypeScript 6.0](https://devblogs.microsoft.com/typescript/announcing-typescript-6-0/) and [TypeScript 7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/): new defaults, deprecations/removals, and native compiler API limits.
 - [Module reference](https://www.typescriptlang.org/docs/handbook/modules/reference.html) and [TSConfig reference](https://www.typescriptlang.org/tsconfig/).
 - [mkosir TypeScript style guide](https://github.com/mkosir/typescript-style-guide): community perspective on inference and consistency, not a mandatory compiler profile.
