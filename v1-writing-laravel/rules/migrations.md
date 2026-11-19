@@ -16,4 +16,4 @@ Provide down() when reversal is genuinely safe. A rollback that drops populated 
 
 Respect the entrypoint's database guard: no reset/drop/truncate/destructive execution without applicable authorization. Test schema changes only against verified isolated targets. Describe deployment order, compatibility, data risk and rollback limits before activation.
 
-Sources: Laravel 12.x [migrations](https://laravel.com/docs/12.x/migrations) and [database transactions](https://laravel.com/docs/12.x/database#database-transactions). Match the installed schema builder and database engine/version; DDL locking, transactionality and rollback support are not universal.
+Sources: Laravel 13.x [migrations](https://laravel.com/docs/13.x/migrations) and [database transactions](https://laravel.com/docs/13.x/database#database-transactions). Match the installed schema builder and database engine/version; DDL locking, transactionality and rollback support are not universal.

@@ -41,4 +41,4 @@ Apply the entrypoint's production-contract and verification requirements to affe
 
 ## Framework context
 
-Use installed-version [Laravel container](https://laravel.com/docs/12.x/container) and [database transaction](https://laravel.com/docs/12.x/database#database-transactions) contracts when applying these decisions. The 12.x links are a reference baseline, not a prescribed application structure. Optional [Laravel Boost](https://github.com/laravel/boost) tooling can help inspect an existing project; it is not an architectural dependency.
+Use installed-version [Laravel container](https://laravel.com/docs/13.x/container) and [database transaction](https://laravel.com/docs/13.x/database#database-transactions) contracts when applying these decisions. The 13.x links are a reference baseline, not a prescribed application structure. Optional [Laravel Boost](https://github.com/laravel/boost) tooling can help inspect an existing project; it is not an architectural dependency.

@@ -14,4 +14,4 @@ getTable() can help a query follow an existing model's dynamic table mapping. Ve
 
 Bind input values. Dynamic table/column identifiers require fixed names or a strict allowlist, not raw user input. Fixed names in historical migrations avoid dependence on evolving models.
 
-Sources: Laravel 12.x [Eloquent](https://laravel.com/docs/12.x/eloquent), [relationships](https://laravel.com/docs/12.x/eloquent-relationships), [casts](https://laravel.com/docs/12.x/eloquent-mutators) and [query builder](https://laravel.com/docs/12.x/queries). Check installed PHP/framework capabilities and existing lifecycle contracts rather than adopting newer attributes/cast syntax automatically.
+Sources: Laravel 13.x [Eloquent](https://laravel.com/docs/13.x/eloquent), [relationships](https://laravel.com/docs/13.x/eloquent-relationships), [casts](https://laravel.com/docs/13.x/eloquent-mutators) and [query builder](https://laravel.com/docs/13.x/queries). Check installed PHP/framework capabilities and existing lifecycle contracts rather than adopting newer attributes/cast syntax automatically.

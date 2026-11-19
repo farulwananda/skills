@@ -8,8 +8,8 @@ Resource controllers suit conventional CRUD endpoints. Explicit routes suit othe
 
 Keep controllers focused on transport, authorization/validation and response. Delegate a cohesive workflow when this clarifies responsibility. A short bounded operation can stay in the controller under repository conventions. No fixed line limit and no mandatory action/service per method.
 
-Inline validation and Form Requests are both valid. Use a Form Request when its reusable/substantial boundary helps; otherwise use the validated return value of inline validation. Apply authorization once at the correct boundary without assuming it exists elsewhere.
+Inline validation and Form Requests are both valid. Use a Form Request when its reusable/substantial boundary helps; otherwise use the validated return value of inline validation. Apply authorization once at the correct boundary without assuming it exists elsewhere. In 13.x, controller #[Middleware]/#[Authorize] attributes are another registration point; check them alongside route files before adding or removing checks.
 
 Preserve status codes, response shape, pagination, redirects and named routes. When verification is authorized, run relevant route/permission regression checks on isolated targets when changing entry points.
 
-Sources: Laravel 12.x [routing](https://laravel.com/docs/12.x/routing), [controllers](https://laravel.com/docs/12.x/controllers) and [authorization](https://laravel.com/docs/12.x/authorization). Match installed registration/binding APIs and preserve existing V1/V2 contracts.
+Sources: Laravel 13.x [routing](https://laravel.com/docs/13.x/routing), [controllers](https://laravel.com/docs/13.x/controllers) and [authorization](https://laravel.com/docs/13.x/authorization). Match installed registration/binding APIs and preserve existing V1/V2 contracts.

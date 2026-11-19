@@ -10,4 +10,4 @@ Use existing constants/enums for shared meaningful states. A one-off literal doe
 
 Follow existing localization conventions for user-facing text. Do not introduce language files or a new translation system solely to relocate a message.
 
-Source: Laravel 12.x [configuration](https://laravel.com/docs/12.x/configuration). Check the installed framework and existing deployment/runbook before changing encryption or configuration caches; do not print resolved secret values while inspecting configuration.
+Source: Laravel 13.x [configuration](https://laravel.com/docs/13.x/configuration). Check the installed framework and existing deployment/runbook before changing encryption or configuration caches; do not print resolved secret values while inspecting configuration.

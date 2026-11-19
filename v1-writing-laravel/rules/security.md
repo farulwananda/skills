@@ -8,7 +8,7 @@ Explicitly select writable fields from validated payloads and define mass-assign
 
 Bind SQL values. Dynamic identifiers need an allowlist. Prevent command/path traversal and validate uploaded content/type/size independently of client filenames. Generate storage names, select public/private storage intentionally and enforce access for private media.
 
-Escape output for its HTML/JS/URL context. Raw HTML requires deliberate trusted sanitization. Preserve CSRF on browser state-changing routes; API/webhook exemptions need the appropriate authenticity controls. Use meaningful auth/API rate limits from abuse and provider capacity requirements.
+Escape output for its HTML/JS/URL context. Raw HTML requires deliberate trusted sanitization. Preserve CSRF on browser state-changing routes; API/webhook exemptions need the appropriate authenticity controls. In 13.x the middleware is PreventRequestForgery (origin-aware via Sec-Fetch-Site with token fallback); VerifyCsrfToken/ValidateCsrfToken remain deprecated aliases, so match the installed name in exclusions and tests. Use meaningful auth/API rate limits from abuse and provider capacity requirements.
 
 For server-side URL fetching, inspect scheme, destination/redirect handling and existing SSRF policy; input validation alone does not establish a safe destination. Verify webhook signatures over the required raw body, replay/duplicate behavior and idempotent processing when the provider supports it.
 
@@ -24,4 +24,4 @@ Encrypted values cannot normally be queried/indexed by plaintext contents. Inspe
 
 Run existing dependency audit tooling when the task/CI policy calls for it; do not add dependencies or weaken controls simply to make implementation easier.
 
-Sources: Laravel 12.x [authorization](https://laravel.com/docs/12.x/authorization), [mass assignment](https://laravel.com/docs/12.x/eloquent#mass-assignment), [encrypted casts](https://laravel.com/docs/12.x/eloquent-mutators#encrypted-casting) and [CSRF protection](https://laravel.com/docs/12.x/csrf). Match the installed version and actual provider signature/security specification; framework helpers alone do not establish tenant isolation or safe SSRF handling.
+Sources: Laravel 13.x [authorization](https://laravel.com/docs/13.x/authorization), [mass assignment](https://laravel.com/docs/13.x/eloquent#mass-assignment), [encrypted casts](https://laravel.com/docs/13.x/eloquent-mutators#encrypted-casting) and [CSRF protection](https://laravel.com/docs/13.x/csrf). Match the installed version and actual provider signature/security specification; framework helpers alone do not establish tenant isolation or safe SSRF handling.

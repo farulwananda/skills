@@ -10,4 +10,4 @@ Render JSON according to the actual API contract and content negotiation; do not
 
 Add structured context containing safe identifiers and relevant state. Do not log raw credentials, personal payloads or arbitrary exception messages indiscriminately. Test reporting/rendering separately when necessary; an exception fake and disabled exception handling serve different purposes.
 
-Sources: Laravel 12.x [error handling](https://laravel.com/docs/12.x/errors) and [HTTP exception tests](https://laravel.com/docs/12.x/http-tests#testing-exceptions). Registration locations and test facades vary by version; inspect the application's installed bootstrap/handler before changing them.
+Sources: Laravel 13.x [error handling](https://laravel.com/docs/13.x/errors) and [HTTP exception tests](https://laravel.com/docs/13.x/http-tests#exception-handling). Registration locations and test facades vary by version; inspect the application's installed bootstrap/handler before changing them.

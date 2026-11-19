@@ -12,10 +12,10 @@ For mutation that changes query membership, prefer stable-key iteration such as 
 
 ## Bulk queries
 
-Both bounded whereIn()/whereKey() queries and an Eloquent collection's toQuery() can fit. In the Laravel 12.x source baseline, toQuery() rejects empty/mixed-model collections and uses newModelQuery(), without global scopes; it does not verify connection homogeneity. Preserve owner/tenant/soft-delete filters, connection and authorization explicitly. Check the installed implementation before substitution.
+Both bounded whereIn()/whereKey() queries and an Eloquent collection's toQuery() can fit. In the Laravel 12.x and 13.x source, toQuery() rejects empty/mixed-model collections and uses newModelQuery(), without global scopes; it does not verify connection homogeneity. Preserve owner/tenant/soft-delete filters, connection and authorization explicitly. Check the installed implementation before substitution.
 
 Define empty-input behavior, model/connection homogeneity and parameter limits. Bulk updates/deletes bypass per-model save/delete events; use the existing lifecycle when those effects are required.
 
 Use a custom collection only for actual reusable behavior. CollectedBy or newCollection() are alternatives depending on installed versions and project conventions, not reasons to introduce a collection class.
 
-Sources: Laravel 12.x [collections](https://laravel.com/docs/12.x/collections), [Eloquent collections](https://laravel.com/docs/12.x/eloquent-collections) and the [toQuery() implementation](https://github.com/laravel/framework/blob/12.x/src/Illuminate/Database/Eloquent/Collection.php). Source branches can change; inspect the locked/installed implementation for security-sensitive substitutions.
+Sources: Laravel 13.x [collections](https://laravel.com/docs/13.x/collections), [Eloquent collections](https://laravel.com/docs/13.x/eloquent-collections) and the [toQuery() implementation](https://github.com/laravel/framework/blob/13.x/src/Illuminate/Database/Eloquent/Collection.php). Source branches can change; inspect the locked/installed implementation for security-sensitive substitutions.

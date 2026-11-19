@@ -13,4 +13,4 @@ Inspect existing scopes, query grain, cardinality, indexes and EXPLAIN before pr
 
 An optimization must preserve owner/tenant scope, ordering, timezone/date boundaries and results. Report measured changes or label the expected benefit as inference.
 
-Sources: Laravel 12.x [advanced subqueries](https://laravel.com/docs/12.x/eloquent#advanced-subqueries), [relationship queries](https://laravel.com/docs/12.x/eloquent-relationships#querying-relationship-existence) and [raw expressions](https://laravel.com/docs/12.x/queries#raw-expressions). Confirm installed APIs and engine-specific execution plans; these are optimization options, not mandatory query patterns.
+Sources: Laravel 13.x [advanced subqueries](https://laravel.com/docs/13.x/eloquent#advanced-subqueries), [relationship queries](https://laravel.com/docs/13.x/eloquent-relationships#querying-relationship-existence) and [raw expressions](https://laravel.com/docs/13.x/queries#raw-expressions). Confirm installed APIs and engine-specific execution plans; these are optimization options, not mandatory query patterns.

@@ -26,4 +26,4 @@ When verification is authorized, run the repository's configured formatter and f
 
 Check installed versions before choosing newer helpers, attributes or syntax. Maintain a coherent style within the target project without rewriting legacy contracts to match another project's structure.
 
-Sources: [PHP type declarations](https://www.php.net/manual/en/language.types.declarations.php), Laravel 12.x [contribution style](https://laravel.com/docs/12.x/contributions#coding-style) and [Pint](https://laravel.com/docs/12.x/pint). Framework contribution style is context, not a reason to override application conventions; installed PHP and formatter configuration govern supported syntax.
+Sources: [PHP type declarations](https://www.php.net/manual/en/language.types.declarations.php), Laravel 13.x [contribution style](https://laravel.com/docs/13.x/contributions#coding-style) and [Pint](https://laravel.com/docs/13.x/pint). Framework contribution style is context, not a reason to override application conventions; installed PHP and formatter configuration govern supported syntax.

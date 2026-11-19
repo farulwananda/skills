@@ -12,6 +12,8 @@ Tags depend on store support; do not assume file, database or DynamoDB support t
 
 Cache::add() provides atomic conditional insertion on supported stores. Lock expiry and crashes still matter; use Cache::lock() and ownership semantics when appropriate. Protect persisted business invariants with database constraints/transactions.
 
+13.x cache config adds serializable_classes (false in new apps, so cached PHP objects are not unserialized); prefer array payloads or an explicit class allowlist over reopening arbitrary object unserialization.
+
 Failover stores can improve availability but may split coordination state between processes. Do not enable them blindly for locks, deduplication or idempotency. No new cache infrastructure without a concrete requirement.
 
-Sources: Laravel 12.x [cache](https://laravel.com/docs/12.x/cache), [tags](https://laravel.com/docs/12.x/cache#cache-tags) and [atomic locks](https://laravel.com/docs/12.x/cache#atomic-locks). flexible(), memo() and failover availability depend on the installed framework release; do not infer support from a major-version documentation link alone.
+Sources: Laravel 13.x [cache](https://laravel.com/docs/13.x/cache), [tags](https://laravel.com/docs/13.x/cache#cache-tags) and [atomic locks](https://laravel.com/docs/13.x/cache#atomic-locks). flexible(), memo() and failover availability depend on the installed framework release; do not infer support from a major-version documentation link alone.

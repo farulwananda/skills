@@ -22,10 +22,10 @@ PreventStrayRequests covers Laravel's HTTP client, not arbitrary SDKs, raw cURL,
 
 Test repository-agreed dependency rules against actual namespaces/classes. Normal Laravel controller inheritance is valid; do not ban it or introduce Domain folders just to satisfy a sample. Ensure the target classes exist so an empty selection does not make a rule pass vacuously.
 
-Browser/visual verification is optional and follows authorized user/repository scope. Do not run it automatically for backend-only changes. Confirm runner/plugin support, authentication state and isolated data before execution.
+Browser/visual verification is optional and follows authorized user/repository scope. Do not run it automatically for backend-only changes. Pest browser tests (4.x+) need the separate pest-plugin-browser package and Playwright; confirm they are installed, plus authentication state and isolated data, before execution.
 
 Report commands/results and limits honestly. Do not delete coverage or weaken assertions to get a green result; preserve compatibility regressions when they protect real consumers.
 
 ## Sources and versions
 
-Primary references: [Pest configuration](https://pestphp.com/docs/configuring-tests), [Pest mocking](https://pestphp.com/docs/mocking), [Laravel database testing](https://laravel.com/docs/12.x/database-testing) and [HTTP test isolation](https://laravel.com/docs/12.x/http-client#preventing-stray-requests). Pest pages are rolling; Laravel links use a 12.x baseline. Verify the installed package APIs and configuration rather than copying current bootstrap examples.
+Primary references: [Pest configuration](https://pestphp.com/docs/configuring-tests), [Pest mocking](https://pestphp.com/docs/mocking), [Laravel database testing](https://laravel.com/docs/13.x/database-testing) and [HTTP test isolation](https://laravel.com/docs/13.x/http-client#preventing-stray-requests). Pest pages are rolling and track the latest major (Pest 5 requires PHP 8.4/PHPUnit 13; Pest 4 PHP 8.3/PHPUnit 12; Pest 3 PHP 8.2/PHPUnit 11; see the [upgrade guide](https://pestphp.com/docs/upgrade-guide)); Laravel links use a 13.x baseline. Verify the installed package APIs and configuration rather than copying current bootstrap examples.

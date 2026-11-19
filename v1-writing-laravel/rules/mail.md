@@ -20,4 +20,4 @@ Markdown mailables can produce HTML and plain-text versions and reuse existing c
 
 Use direct mailable rendering/content assertions for HTML/text content and Mail::fake() with assertSent()/assertQueued() for dispatch, recipients and contract-relevant data. Keep the responsibilities explicit; a focused test can cover both when that improves the regression signal. Rendering may still trigger application queries or attachment reads, so inspect and isolate those dependencies. No real mail delivery without authorization.
 
-Source: Laravel 12.x [mail](https://laravel.com/docs/12.x/mail), especially [queueing](https://laravel.com/docs/12.x/mail#queueing-mail) and [testing](https://laravel.com/docs/12.x/mail#testing-mailables). Match installed APIs, transport and transaction configuration.
+Source: Laravel 13.x [mail](https://laravel.com/docs/13.x/mail), especially [queueing](https://laravel.com/docs/13.x/mail#queueing-mail) and [testing](https://laravel.com/docs/13.x/mail#testing-mailables). Match installed APIs, transport and transaction configuration.

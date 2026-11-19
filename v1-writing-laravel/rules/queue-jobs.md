@@ -18,7 +18,7 @@ Set worker/job timeout below the queue visibility window (retry_after on relevan
 
 Choose bounded backoff from transient failure and rate-limit semantics. A timeout after submitting paid work may mean accepted, not rejected; reconcile or reuse the existing idempotency/receipt mechanism before resubmission.
 
-Laravel retryUntil() takes precedence over attempt limits in the installed worker. It does not universally require tries=0. Inspect installed-version behavior and maxExceptions/release/timeout semantics before changing existing limits.
+Retry/timeout settings may be job properties or, in 13.x, attributes such as #[Tries], #[Backoff], #[Timeout] and #[RetryFor]; follow the existing form. 13.x Queue::route() can set a job's default connection/queue centrally, so inspect it before assuming where a job runs. Laravel retryUntil() takes precedence over attempt limits in the installed worker. It does not universally require tries=0. Inspect installed-version behavior and maxExceptions/release/timeout semantics before changing existing limits.
 
 ## Deduplication and failure handling
 
@@ -36,4 +36,4 @@ Database transaction callbacks may be retried after a deadlock. Do not put a pai
 
 Horizon is optional Redis queue infrastructure, not required for multiple queues. Prefer existing worker/monitoring setup unless requirements justify a dependency and operational change.
 
-Sources: Laravel 12.x [queues](https://laravel.com/docs/12.x/queues), including [serialized relationships](https://laravel.com/docs/12.x/queues#handling-relationships), [unique jobs](https://laravel.com/docs/12.x/queues#unique-jobs), [time-based attempts](https://laravel.com/docs/12.x/queues#time-based-attempts) and [transactions](https://laravel.com/docs/12.x/queues#jobs-and-database-transactions). Inspect installed worker/driver code and configuration before applying optional mechanisms.
+Sources: Laravel 13.x [queues](https://laravel.com/docs/13.x/queues), including [serialized relationships](https://laravel.com/docs/13.x/queues#handling-relationships), [unique jobs](https://laravel.com/docs/13.x/queues#unique-jobs), [time-based attempts](https://laravel.com/docs/13.x/queues#time-based-attempts) and [transactions](https://laravel.com/docs/13.x/queues#jobs-and-database-transactions). Inspect installed worker/driver code and configuration before applying optional mechanisms.

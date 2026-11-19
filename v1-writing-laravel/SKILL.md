@@ -1,12 +1,12 @@
 ---
-name: fw-writing-laravel
+name: v1-writing-laravel
 description: Use when implementing, reviewing or refactoring Laravel backend PHP, architecture, database queries/schema, integrations, queues or Pest tests; also for evidence-based overengineering reviews. Not for visual design or unrelated software tasks.
 license: MIT
 metadata:
   author: Farulwananda project conventions; consolidated Laravel and Pest guidance
 ---
 
-# FW Writing Laravel
+# V1 Writing Laravel
 
 Act as a pragmatic Senior Backend Engineer responsible for Architecture and Database. Prioritize correctness, security, maintainability, performance and simplicity. Use YAGNI, KISS, DRY, SOLID and domain ownership as decision tools, not requirements to add layers. Use this skill for Laravel application behavior; use language guidance for general PHP concerns and the repository's operational runbook for deployment. It is not a mandate for DDD, frontend redesign or infrastructure changes.
 
@@ -56,10 +56,10 @@ For tests, use factories/fakes where appropriate and prevent stray HTTP. Do not 
 
 ## Source and version context
 
-This library is an original synthesis of project conventions and primary documentation, not copied Boost templates. The linked Laravel 12.x documentation is a version-pinned reference baseline, not a requirement to upgrade or a claim that every 12.x patch supports every named API. Resolve the installed major/minor/patch and consult matching docs/source first, especially for newer helpers, attributes, cache memoization/failover and test facades.
+This library is an original synthesis of project conventions and primary documentation, not copied Boost templates. The linked Laravel 13.x documentation is a version-pinned reference baseline, not a requirement to upgrade or a claim that every patch supports every named API. Laravel 13 (March 2026) requires PHP 8.3+; 12.x (PHP 8.2+) receives security fixes only until February 2027, and 11.x is end of life. For a 12.x or older project, switch the doc links to the matching major. Resolve the installed major/minor/patch and consult matching docs/source first, especially for newer helpers, attributes (for example 13.x job and controller attributes), cache memoization/failover and test facades.
 
-- [Laravel documentation](https://laravel.com/docs/12.x) supplies framework contracts; each relevant rule links its topic.
+- [Laravel documentation](https://laravel.com/docs/13.x) supplies framework contracts; each relevant rule links its topic. See the [support policy](https://laravel.com/docs/13.x/releases#support-policy) and [upgrade guide](https://laravel.com/docs/13.x/upgrade) for version boundaries.
 - [Pest documentation](https://pestphp.com/docs/configuring-tests) is rolling documentation: match installed Pest/PHPUnit/plugin versions and existing uses()/pest() configuration.
-- [Official Laravel Boost repository](https://github.com/laravel/boost) is an optional source for version-aware Laravel development tooling. If already configured, use its available inspection/documentation tools; otherwise use repository files and official docs. Do not assume Boost, install it automatically or treat its templates as application requirements.
+- [Laravel Boost](https://laravel.com/docs/13.x/boost) is optional dev tooling (an MCP server with application-info, schema, log and version-aware docs-search tools, plus guidelines, skills and `.ai/rules` project rules). If already configured, use its read-only inspection/documentation tools and respect recorded project rules; otherwise use repository files and official docs. Its database-query tool is subject to the database guard above. Do not assume Boost, install it automatically or treat its templates as application requirements.
 
 The audit aligns the rule library with conditional architecture, guarded database verification and preserved provider/version contracts. Framework documentation describes mechanisms; it does not authorize paid calls, database resets or operational changes.

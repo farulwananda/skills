@@ -12,4 +12,4 @@ Use dedicated queues only for demonstrated channel workload/priority isolation. 
 
 Preserve broadcast channels, payloads, queue names, authorization and serialized identities. Review pending/retry/failed compatibility before deleting old identities.
 
-Sources: Laravel 12.x [events](https://laravel.com/docs/12.x/events) and [notifications](https://laravel.com/docs/12.x/notifications). Discovery, after-commit interfaces/options and queue behavior must match the installed version; no automatic worker/cache activation or real message delivery.
+Sources: Laravel 13.x [events](https://laravel.com/docs/13.x/events) and [notifications](https://laravel.com/docs/13.x/notifications). Discovery, after-commit interfaces/options and queue behavior must match the installed version; no automatic worker/cache activation or real message delivery.

@@ -13,4 +13,4 @@ Follow the [conditional architecture decisions](../references/architecture.md). 
 - Concurrency adds processes/connections and load. Use only when independent work, driver support and measured benefit justify it. Preserve transactions, limits and failure semantics.
 - Keep framework conventions where they fit; explicit mappings for existing schemas and compatibility are legitimate.
 
-Sources: Laravel 12.x [container](https://laravel.com/docs/12.x/container), [helpers](https://laravel.com/docs/12.x/helpers#deferred-functions), [context](https://laravel.com/docs/12.x/context) and [concurrency](https://laravel.com/docs/12.x/concurrency). Check installed versions and driver/lifetime semantics before using optional APIs.
+Sources: Laravel 13.x [container](https://laravel.com/docs/13.x/container), [helpers](https://laravel.com/docs/13.x/helpers#deferred-functions), [context](https://laravel.com/docs/13.x/context) and [concurrency](https://laravel.com/docs/13.x/concurrency). Check installed versions and driver/lifetime semantics before using optional APIs.

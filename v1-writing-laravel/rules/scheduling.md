@@ -11,4 +11,4 @@ A scheduler selects when work starts; it does not automatically require a queued
 
 Review timezone/DST, due times, retry/replay, locks and deployment registration before changing a schedule. Existing scheduler and queue flows must remain compatible; do not add worker infrastructure merely because a task is scheduled.
 
-Source: Laravel 12.x [scheduling](https://laravel.com/docs/12.x/scheduling). Verify installed APIs, scheduler registration, shared lock support and process capacity. Do not run schedule:run or start workers as a harmless inspection command: due tasks may write data, send messages or incur provider charges.
+Source: Laravel 13.x [scheduling](https://laravel.com/docs/13.x/scheduling). Verify installed APIs, scheduler registration, shared lock support and process capacity. Do not run schedule:run or start workers as a harmless inspection command: due tasks may write data, send messages or incur provider charges.
