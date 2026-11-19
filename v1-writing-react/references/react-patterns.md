@@ -54,7 +54,7 @@ export const Action = forwardRef<
 });
 ```
 
-A library supporting both React 18 and 19 may retain `forwardRef`; React 19 support alone is not a reason to break older consumers. Do not render both modules under the same export.
+A library supporting both React 18 and 19 may retain `forwardRef`; it remains supported in React 19 and is only documented as a future deprecation. React 19 support alone is not a reason to break older consumers. Do not render both modules under the same export.
 
 ## Primitive Wrappers and Composition
 
@@ -75,9 +75,9 @@ Custom render components must pass the primitive-provided events, ref, class/sta
 
 - A controlled `value`/`checked`/`open` comes from the caller; changes notify it. An uncontrolled component initializes from `defaultValue`/`defaultChecked`/`defaultOpen` and owns subsequent updates. Do not pass both, switch modes during a component's lifetime, or treat `false`, `0`, or an empty string as “uncontrolled.”
 - Use the existing primitive's state management when available. Do not mirror controlled props in local state via effects or fire change callbacks from effects.
-- Compute derived values while rendering. Handle user-triggered mutations in event handlers, not render/effect chains. Effects synchronize external systems; include correct dependencies and symmetric cleanup for subscriptions, listeners, timers, and requests.
+- Compute derived values while rendering. Handle user-triggered mutations in event handlers, not render/effect chains. Effects synchronize external systems; include correct dependencies and symmetric cleanup for subscriptions, listeners, timers, and requests. On React 19.2+, move non-reactive logic read inside an effect into `useEffectEvent` instead of suppressing the dependency lint.
 - Prefer minimal local state; lift it only to the nearest actual owner. Use stable keys for list identity and intentional state reset, not indexes for reorderable records or random values.
-- Avoid blanket `memo`, `useMemo`, and `useCallback`. Measure a real bottleneck and inspect whether the repository enables React Compiler before adding memoization.
+- Avoid blanket `memo`, `useMemo`, and `useCallback`. Measure a real bottleneck and inspect whether the repository enables React Compiler (stable since 1.0) before adding memoization; where it is enabled, keep existing manual memoization unless profiling justifies removal, and respect the compiler rules in the installed `eslint-plugin-react-hooks` preset.
 
 ## Loading and Host Boundaries
 
@@ -85,7 +85,7 @@ Use the existing router/framework loader or query integration for route data, pe
 
 If a client effect must fetch, handle stale responses/unmount cleanup, loading/error states, and HTTP failure status explicitly. Avoid duplicate sources of truth with an existing query cache. Mutations and paid/non-idempotent calls must not be replayed by mount effects or automatic retries without an explicit idempotency/authorization contract.
 
-`'use client'`, Next-specific images/navigation, React Server Components, server actions, and framework cache APIs are not universal React features. Do not transplant them into TanStack, Vite, or Cloudflare projects. Keep server-only secrets out of browser modules and use the actual host's server boundary; avoid Node/Bun assumptions in Worker/browser code.
+In React 19, `<form action>`, `useActionState`, `useFormStatus`, and `useOptimistic` work client-side too; prefer them for form mutations only when the repository already uses them or the host's established mutation layer does not apply. `'use client'`, Next-specific images/navigation, React Server Components, Server Functions (`'use server'`), and framework cache APIs are not universal React features. Do not transplant them into TanStack, Vite, or Cloudflare projects. Keep server-only secrets out of browser modules and use the actual host's server boundary; avoid Node/Bun assumptions in Worker/browser code.
 
 ## Compound Components
 
@@ -139,6 +139,8 @@ Use the repository's existing formatter/typecheck/focused tests and a proportion
 
 - [React `forwardRef`](https://react.dev/reference/react/forwardRef): React 18-compatible forwarding and React 19 ref props.
 - [React input contracts](https://react.dev/reference/react-dom/components/input): controlled/uncontrolled values and events.
+- [React 19](https://react.dev/blog/2024/12/05/react-19), [19.2](https://react.dev/blog/2025/10/01/react-19-2), and [19.3](https://react.dev/blog/2026/09/09/react-19-3) release notes: version-gated APIs.
+- [React Compiler v1.0](https://react.dev/blog/2025/10/07/react-compiler-1): stable compiler and lint integration.
 - [React effects guidance](https://react.dev/learn/you-might-not-need-an-effect): derived state and event logic.
 - [Base UI composition](https://base-ui.com/react/handbook/composition): consult the installed release before using merge/render utilities.
 - [Vercel agent skills](https://github.com/vercel-labs/agent-skills): consulted for general waterfall, bundle, and UI principles only. Its Next.js/Vercel-specific rules are not requirements here.

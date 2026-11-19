@@ -1,9 +1,9 @@
 ---
-name: fw-writing-react
+name: v1-writing-react
 description: Use when writing, reviewing, or refactoring React and TypeScript UI components in Farul Wananda projects, including accessible primitives, compound APIs, state ownership, effects, data loading, and repository-native styling.
 ---
 
-# FW Writing React
+# V1 Writing React
 
 ## Overview
 
@@ -28,7 +28,8 @@ Use for React DOM components and their composition/state/data-flow review. Do no
 ## Component Contract
 
 - Type native wrappers with `React.ComponentPropsWithRef<'tag'>` when exposing a ref; inherit primitive props without duplicating their contract.
-- Match the runtime **and types**: React 18 ref forwarding uses `forwardRef`; React 19 can accept `ref` as a prop. Do not silently upgrade a React 18 API or break a library's supported version range.
+- Match the runtime **and types**: React 18 ref forwarding uses `forwardRef`; React 19 can accept `ref` as a prop (`forwardRef` still works and is slated for future deprecation). Do not silently upgrade a React 18 API or break a library's supported version range.
+- Newer APIs are minor-version gated: Actions, `useActionState`, `useOptimistic`, `use`, and `<Context value>` as provider (19.0); `<Activity>` and `useEffectEvent` (19.2); stable `<ViewTransition>`, Fragment refs, and `use(browser())` (19.3). Use them only when the installed `react`/`react-dom` and types support them.
 - Preserve caller events, refs, `aria-*`, `data-*`, form attributes, and children. When adding internal events/refs, compose them using the installed primitive's helpers and cancellation semantics rather than overwriting either side.
 - Merge `className` through the existing helper, preserving function-valued primitive classes where supported. Order spreads deliberately; protect fixed semantics without dropping caller extensibility.
 - Use stable `data-slot` parts and state selectors only where that is an existing styling contract, not on every incidental node.
